@@ -1,0 +1,15 @@
+# Nur benchmarks/, plot_forms/ und requirements.txt gehoeren ins Image.
+.git
+.claude
+vendor
+raw_results
+final_plotted_results
+**/__pycache__
+**/*.pyc
+benchmarks/Results
+benchmarks/old results
+benchmarks/diagnose
+benchmarks/*.txt
+benchmarks/*.ps1
+*.tex
+*.stackdump

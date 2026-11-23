@@ -9,6 +9,22 @@ The results of these benchmarks are used in the thesis:
 The measured data and plots are not part of this repository; the benchmarks create
 them locally when you run them (see [Results](#results)).
 
+## Quick start (Docker)
+
+The only requirement is [Docker](https://docs.docker.com/get-docker/) (Docker Desktop on
+Windows/macOS or Docker Engine on Linux). No Python setup, no submodules:
+
+```bash
+git clone https://github.com/dfaigle/qc-frameworks-benchmark-suite.git
+cd qc-frameworks-benchmark-suite
+docker compose up --build
+```
+
+This builds the image and runs a short demo of all four benchmarks in parallel
+(raw PennyLane, raw Qiskit, Executor with PennyLane backend, Executor with Qiskit
+backend; 5 qubits, up to 200 gates, all three modes). It takes about 5-10 minutes. The CSVs and plots
+appear in `raw_results/` on your machine.
+
 ## Idea
 
 The same random circuits (same gate set, seed and gate counts) are run twice:
@@ -41,10 +57,11 @@ plot_forms/                   scripts that combine several runs into comparison 
   plot_qiskit_vs_executor_multi_qubit.py         time,   Qiskit vs. Executor
   plot_qiskit_vs_executor_multi_qubit_mem.py     memory, Qiskit vs. Executor
   plot_tape_vs_qnode_multi_qubit.py              PennyLane QNode vs. tape
-vendor/executor/              qc-executor as git submodule
-Dockerfile                    image with Python 3.12, requirements and the executor
-build_and_run.sh              builds the image and starts a benchmark in Docker
-requirements.txt              Python dependencies
+vendor/executor/              qc-executor as git submodule (only needed without Docker)
+Dockerfile                    image with Python 3.12, pinned requirements and the executor
+docker-compose.yml            demo run and single runs via Docker Compose
+build_and_run.sh              long background runs on a Linux server
+requirements.txt              pinned Python dependencies
 ```
 
 Created locally when you run the scripts, ignored by git:
@@ -115,7 +132,7 @@ folder names in `RUNS`; otherwise the script stops because the folders are missi
 
 ## Setup and usage
 
-Setup (once):
+Without Docker (Python 3.12), setup once:
 
 ```bash
 git submodule update --init --recursive   # downloads the executor into vendor/executor
@@ -140,18 +157,28 @@ qubit counts in parallel, start the script once per qubit count.
 
 Results are written to `raw_results/<Pennylane|Qiskit|Executor|TapeVsQNode>/`.
 The plot scripts read the run folders listed in their `RUNS` dict and write to
-`final_plotted_results/`. Both folders are created automatically if they do not
-exist and are listed in `.gitignore`.
+`final_plotted_results/`. Their contents are ignored by git.
 
 ### Docker
 
-Long runs can also be started in Docker:
+Any script and its flags can be run through Docker Compose; everything after
+`bench` is passed straight to `python` inside the container:
 
 ```bash
-./build_and_run.sh                                                  # pennylane_benchmark.py, default flags
-./build_and_run.sh benchmarks/qiskit_benchmark.py --qubits 8 --mode gradient
-./build_and_run.sh benchmarks/abstraction_benchmark.py --framework pennylane --qubits 5 8 10 12
+docker compose run --rm bench benchmarks/qiskit_benchmark.py --qubits 8 --mode gradient
+docker compose run --rm bench benchmarks/abstraction_benchmark.py --framework pennylane --qubits 5 8 10 12
+docker compose run --rm bench benchmarks/pennylane_benchmark.py --help
+docker compose run --rm bench plot_forms/plot_pennylane_vs_executor_multi_qubit.py
 ```
 
-The script and its flags are passed straight to `python` inside the container.
-`benchmarks/` is mounted read-only, results are written to `raw_results/` on the host.
+`benchmarks/` and `plot_forms/` are mounted read-only, so local code changes are
+used without rebuilding. Results go to `raw_results/` and `final_plotted_results/`
+on the host. The image installs the executor straight from GitHub at the commit
+used in the thesis, so the submodule is not needed.
+
+For long runs in the background on a Linux server there is `build_and_run.sh`
+(CPU and memory limits via environment variables):
+
+```bash
+CPUS=16 MEMORY=128g ./build_and_run.sh benchmarks/abstraction_benchmark.py --framework pennylane --qubits 5 8 10 12
+```

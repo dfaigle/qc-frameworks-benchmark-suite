@@ -1,0 +1,45 @@
+# Docker Compose fuer die Benchmarks. Relative Pfade funktionieren auf
+# Windows, macOS und Linux gleich.
+#
+#   docker compose up --build
+#       Demo: alle vier Benchmarks parallel mit kleinen Einstellungen
+#       (5 Qubits, bis 200 Gates, 1 Wiederholung). Dauert ca. 5-10 Minuten.
+#
+#   docker compose run --rm bench <skript> [flags]
+#       Beliebiger einzelner Lauf, z. B.:
+#       docker compose run --rm bench benchmarks/abstraction_benchmark.py --framework qiskit --qubits 5 8
+#       docker compose run --rm bench benchmarks/pennylane_benchmark.py --help
+#
+# Ergebnisse landen auf dem Host in ./raw_results bzw. ./final_plotted_results.
+
+x-bench: &bench
+  build: .
+  image: abstraction-benchmark:latest
+  volumes:
+    - ./benchmarks:/app/benchmarks:ro
+    - ./plot_forms:/app/plot_forms:ro
+    - ./raw_results:/app/raw_results
+    - ./final_plotted_results:/app/final_plotted_results
+  shm_size: 1gb
+
+services:
+  # Fuer eigene Laeufe: docker compose run --rm bench <skript> [flags]
+  bench:
+    <<: *bench
+    profiles: ["manual"]
+
+  demo-pennylane:
+    <<: *bench
+    command: ["benchmarks/pennylane_benchmark.py", "--qubits", "5", "--max-gates", "200", "--repeats", "1"]
+
+  demo-qiskit:
+    <<: *bench
+    command: ["benchmarks/qiskit_benchmark.py", "--qubits", "5", "--max-gates", "200", "--repeats", "1"]
+
+  demo-executor-pennylane:
+    <<: *bench
+    command: ["benchmarks/abstraction_benchmark.py", "--framework", "pennylane", "--qubits", "5", "--max-gates", "200", "--repeats", "1"]
+
+  demo-executor-qiskit:
+    <<: *bench
+    command: ["benchmarks/abstraction_benchmark.py", "--framework", "qiskit", "--qubits", "5", "--max-gates", "200", "--repeats", "1"]

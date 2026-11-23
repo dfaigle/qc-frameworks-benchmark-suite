@@ -1,5 +1,7 @@
-numpy
-qiskit
+numpy==2.5.5
+scipy==1.18.1
+qiskit==2.6.2
 pennylane==0.42.3
-pandas
-matplotlib
+pennylane-lightning==0.44.0
+pandas==3.1.1
+matplotlib==3.11.2

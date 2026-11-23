@@ -1,2 +1,7 @@
-raw_results/
-final_plotted_results/
+# Ergebnisse werden lokal erzeugt; die Ordner selbst bleiben (per .gitkeep) im
+# Repo, damit Docker sie nicht als root anlegt.
+raw_results/*
+!raw_results/.gitkeep
+final_plotted_results/*
+!final_plotted_results/.gitkeep
+__pycache__/
