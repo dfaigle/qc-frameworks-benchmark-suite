@@ -1,25 +1,33 @@
-# Benchmarking System
+# QC Frameworks Benchmark Suite
 
-Performance benchmarks for my bachelor thesis. They measure how much overhead the
-[qc-executor](https://github.com/flaqship/qc-executor) abstraction layer adds compared to
-using PennyLane or Qiskit directly.
+A benchmark suite for quantum computing frameworks. It measures runtime and peak
+memory of **PennyLane** and **Qiskit** on identical random circuits, from building
+the circuit through executing it to computing gradients.
 
-The results of these benchmarks are used in the thesis:
+In addition, the suite can benchmark the
+[qc-executor](https://github.com/flaqship/qc-executor) abstraction layer: the same
+circuits are run through the Executor on top of PennyLane or Qiskit, which shows how
+much overhead the abstraction adds compared to using the frameworks directly.
+
+The suite was developed for my bachelor thesis, which uses its results:
 **[dfaigle/dfaigle-bachelor-Thesis](https://github.com/dfaigle/dfaigle-bachelor-Thesis)**.
 The measured data and plots are not part of this repository; the benchmarks create
 them locally when you run them (see [Results](#results)).
 
 ## Idea
 
-The same random circuits (same gate set, seed and gate counts) are run twice:
+All benchmarks use the same random circuits (same gate set, seed and gate counts),
+so the results are directly comparable. Each circuit can run on a framework directly
+or through the Executor:
 
 ```
 raw framework:   PennyLane / Qiskit  ──────────────►  simulator
 executor:        AbstractQuantumCircuit ─► Executor ─► PennyLane / Qiskit ─► simulator
 ```
 
-The difference between the two runs is the cost of the abstraction. Each run
-measures time and peak memory (`tracemalloc`) in three modes:
+Comparing PennyLane and Qiskit shows how the frameworks perform against each other;
+the difference between a raw run and an Executor run is the cost of the abstraction.
+Each run measures time and peak memory (`tracemalloc`) in three modes:
 
 | Mode        | What is measured                                   |
 |-------------|----------------------------------------------------|
