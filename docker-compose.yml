@@ -2,8 +2,8 @@
 # Windows, macOS und Linux gleich.
 #
 #   docker compose up --build
-#       Demo: alle vier Benchmarks parallel mit kleinen Einstellungen
-#       (5 Qubits, bis 200 Gates, 1 Wiederholung). Dauert ca. 5-10 Minuten.
+#       Smoke-Test: alle vier Benchmarks parallel mit reduzierten Parametern
+#       (5 Qubits, bis 100 Gates, 1 Wiederholung). Dauert ca. 3-5 Minuten (plus ca. 5 Minuten fuer den ersten Build).
 #
 #   docker compose run --rm bench <skript> [flags]
 #       Beliebiger einzelner Lauf, z. B.:
@@ -28,18 +28,18 @@ services:
     <<: *bench
     profiles: ["manual"]
 
-  demo-pennylane:
+  smoke-pennylane:
     <<: *bench
-    command: ["benchmarks/pennylane_benchmark.py", "--qubits", "5", "--max-gates", "200", "--repeats", "1"]
+    command: ["benchmarks/pennylane_benchmark.py", "--qubits", "5", "--max-gates", "100", "--repeats", "1"]
 
-  demo-qiskit:
+  smoke-qiskit:
     <<: *bench
-    command: ["benchmarks/qiskit_benchmark.py", "--qubits", "5", "--max-gates", "200", "--repeats", "1"]
+    command: ["benchmarks/qiskit_benchmark.py", "--qubits", "5", "--max-gates", "100", "--repeats", "1"]
 
-  demo-executor-pennylane:
+  smoke-executor-pennylane:
     <<: *bench
-    command: ["benchmarks/abstraction_benchmark.py", "--framework", "pennylane", "--qubits", "5", "--max-gates", "200", "--repeats", "1"]
+    command: ["benchmarks/abstraction_benchmark.py", "--framework", "pennylane", "--qubits", "5", "--max-gates", "100", "--repeats", "1"]
 
-  demo-executor-qiskit:
+  smoke-executor-qiskit:
     <<: *bench
-    command: ["benchmarks/abstraction_benchmark.py", "--framework", "qiskit", "--qubits", "5", "--max-gates", "200", "--repeats", "1"]
+    command: ["benchmarks/abstraction_benchmark.py", "--framework", "qiskit", "--qubits", "5", "--max-gates", "100", "--repeats", "1"]

@@ -2,7 +2,7 @@
 # oder Docker Engine), ohne Git-Submodule und ohne SSH-Key.
 #
 # Schnellstart (siehe README):
-#   docker compose up --build                  # kurzer Demo-Lauf aller vier Benchmarks
+#   docker compose up --build                  # Smoke-Test aller vier Benchmarks
 #   docker compose run --rm bench benchmarks/qiskit_benchmark.py --qubits 8 --mode gradient
 
 FROM python:3.12-slim
@@ -48,5 +48,5 @@ RUN mkdir -p raw_results final_plotted_results \
 USER bench
 
 ENTRYPOINT ["python"]
-# Standard: kurzer Lauf, der in wenigen Minuten fertig ist.
-CMD ["benchmarks/pennylane_benchmark.py", "--qubits", "5", "--mode", "all", "--max-gates", "200", "--repeats", "1"]
+# Standard: kurzer Smoke-Test mit reduzierten Parametern.
+CMD ["benchmarks/pennylane_benchmark.py", "--qubits", "5", "--mode", "all", "--max-gates", "100", "--repeats", "1"]

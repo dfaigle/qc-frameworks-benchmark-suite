@@ -9,22 +9,6 @@ The results of these benchmarks are used in the thesis:
 The measured data and plots are not part of this repository; the benchmarks create
 them locally when you run them (see [Results](#results)).
 
-## Quick start (Docker)
-
-The only requirement is [Docker](https://docs.docker.com/get-docker/) (Docker Desktop on
-Windows/macOS or Docker Engine on Linux). No Python setup, no submodules:
-
-```bash
-git clone https://github.com/dfaigle/qc-frameworks-benchmark-suite.git
-cd qc-frameworks-benchmark-suite
-docker compose up --build
-```
-
-This builds the image and runs a short demo of all four benchmarks in parallel
-(raw PennyLane, raw Qiskit, Executor with PennyLane backend, Executor with Qiskit
-backend; 5 qubits, up to 200 gates, all three modes). It takes about 5-10 minutes. The CSVs and plots
-appear in `raw_results/` on your machine.
-
 ## Idea
 
 The same random circuits (same gate set, seed and gate counts) are run twice:
@@ -59,7 +43,7 @@ plot_forms/                   scripts that combine several runs into comparison 
   plot_tape_vs_qnode_multi_qubit.py              PennyLane QNode vs. tape
 vendor/executor/              qc-executor as git submodule (only needed without Docker)
 Dockerfile                    image with Python 3.12, pinned requirements and the executor
-docker-compose.yml            demo run and single runs via Docker Compose
+docker-compose.yml            benchmark runs and smoke test via Docker Compose
 build_and_run.sh              long background runs on a Linux server
 requirements.txt              pinned Python dependencies
 ```
@@ -159,22 +143,48 @@ Results are written to `raw_results/<Pennylane|Qiskit|Executor|TapeVsQNode>/`.
 The plot scripts read the run folders listed in their `RUNS` dict and write to
 `final_plotted_results/`. Their contents are ignored by git.
 
-### Docker
+## Docker
 
-Any script and its flags can be run through Docker Compose; everything after
+All benchmarks can be run in Docker without any local Python setup and without
+the submodule. The image pins all dependencies and installs the executor straight
+from GitHub at the commit used in the thesis, so the measurements are reproducible
+on any machine with [Docker](https://docs.docker.com/get-docker/) (Docker Desktop on
+Windows/macOS or Docker Engine on Linux).
+
+```bash
+git clone https://github.com/dfaigle/qc-frameworks-benchmark-suite.git
+cd qc-frameworks-benchmark-suite
+docker compose build
+```
+
+Any script and its flags can then be run through Docker Compose; everything after
 `bench` is passed straight to `python` inside the container:
 
 ```bash
-docker compose run --rm bench benchmarks/qiskit_benchmark.py --qubits 8 --mode gradient
 docker compose run --rm bench benchmarks/abstraction_benchmark.py --framework pennylane --qubits 5 8 10 12
+docker compose run --rm bench benchmarks/qiskit_benchmark.py --qubits 8 --mode gradient
 docker compose run --rm bench benchmarks/pennylane_benchmark.py --help
 docker compose run --rm bench plot_forms/plot_pennylane_vs_executor_multi_qubit.py
 ```
 
 `benchmarks/` and `plot_forms/` are mounted read-only, so local code changes are
 used without rebuilding. Results go to `raw_results/` and `final_plotted_results/`
-on the host. The image installs the executor straight from GitHub at the commit
-used in the thesis, so the submodule is not needed.
+on the host.
+
+### Smoke test
+
+To check that the setup works on your machine, run all four benchmarks (raw
+PennyLane, raw Qiskit, Executor with PennyLane and with Qiskit backend) with
+reduced parameters (5 qubits, up to 100 gates, one repetition, all three modes):
+
+```bash
+docker compose up --build
+```
+
+This takes about 3-5 minutes (plus about 5 minutes for the first image build) and writes the same CSVs and plots to `raw_results/`
+as a full run.
+
+### Long runs on a server
 
 For long runs in the background on a Linux server there is `build_and_run.sh`
 (CPU and memory limits via environment variables):
